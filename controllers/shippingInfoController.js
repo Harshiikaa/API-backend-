@@ -40,11 +40,11 @@ const getSingleShippingInfo = async (req, res) => {
         })
     }
     try {
-        const singleUser = await Users.findById(id);
+        const singleShippingInfo = await ShippingInfo.findById(id);
         res.json({
             success: true,
             message: "shipping info fetched successfully",
-            user: singleUser
+            shippingInfo: singleShippingInfo
 
         })
 
@@ -107,6 +107,6 @@ const updateShippingInfo = async (req, res) => {
 }
 
 
-module.exports = {  createShippingInfo, getSingleShippingInfo, updateShippingInfo };
+module.exports = { createShippingInfo, getSingleShippingInfo, updateShippingInfo };
 
 
