@@ -5,8 +5,6 @@ const cloudinary = require('cloudinary')
 
 
 
-
-
 // CREATE USER 
 const registerUser = async (req, res) => {
     console.log(req.body)
