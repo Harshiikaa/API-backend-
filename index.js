@@ -49,6 +49,7 @@ app.use('/api/category', require('./routes/categoryRoutes'))
 app.use('/api/favorite', require('./routes/favoriteRoutes'))
 app.use('/api/shoppingBag', require('./routes/shoppingBagRoutes'))
 app.use('/api/shippingInfo', require('./routes/shippingInfoRoutes'))
+app.use('/api/order', require('./routes/orderRoutes'))
 
 
 

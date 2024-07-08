@@ -1,5 +1,10 @@
 const mongoose = require('mongoose');
 const shippingInfoSchema = mongoose.Schema({
+    shoppingID: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'shoppingBag',
+        required: true,
+    },
     firstName: {
         type: String,
         required: true,

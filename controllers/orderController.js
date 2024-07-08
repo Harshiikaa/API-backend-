@@ -71,9 +71,9 @@ const getSingleOrder = async (req, res) => {
 }
 
 const getOrderByUserID = async (req, res) => {
-    const id = req.user.id;
+    const id = req.params.id;
     try {
-        const order = await Orders.find({ userID: id }).populate('productID', 'productName productRentalPrice productSecurityDeposit productCategory productQuantity productSize productDescription productImageURL');
+        const order = await Orders.find({ userID: id });
         res.json({
             message: "retrieved",
             success: true,
@@ -106,40 +106,49 @@ const getAllOrders = async (req, res) => {
 
 }
 
+
 const updateOrderStatus = async (req, res) => {
     console.log(req.body);
-    const {
-        orderStatus,
-    } = req.body;
 
-
+    const { orderStatus } = req.body;
     const id = req.params.id;
-    if (!orderStatus
-    ) {
-        res.json({
-            success: true,
-            message: "All fields are required!"
-        })
-    }
-    try {
-        const updatedOrder = {
-            orderStatus: orderStatus,
-        }
-        await Orders.findByIdAndUpdate(id, updatedOrder);
-        res.json({
-            success: true,
-            message: "Order updated successfully",
-            order: updatedOrder
-        })
 
+    // Check if orderStatus is provided
+    if (!orderStatus) {
+        return res.json({
+            success: false,
+            message: "orderStatus is required!"
+        });
+    }
+
+    try {
+        // Find the order by ID and update the orderStatus field
+        const updatedOrder = await Orders.findByIdAndUpdate(
+            id,
+            { orderStatus: orderStatus },
+            { new: true }
+        );
+
+        if (!updatedOrder) {
+            return res.status(404).json({
+                success: false,
+                message: "Order not found!"
+            });
+        }
+
+        res.json({
+            success: true,
+            message: "Order status updated successfully",
+            order: updatedOrder
+        });
     } catch (error) {
-        console.log(error)
+        console.log(error);
         res.status(500).json({
             success: false,
             message: "Server Error"
-        })
+        });
     }
-}
+};
 
 const cancelOrder = async (req, res) => {
     const id = req.params.id;

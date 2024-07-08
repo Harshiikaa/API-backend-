@@ -4,8 +4,8 @@ const ShippingInfo = require("../model/ShippingInfoModel")
 // CREATE SHIPPING INFO 
 const createShippingInfo = async (req, res) => {
     console.log(req.body)
-    const { firstName, lastName, contactNumber, city, address, nearLandmark } = req.body
-    if (!firstName || !lastName || !contactNumber || !city || !address || !nearLandmark) {
+    const { shoppingID, firstName, lastName, contactNumber, city, address, nearLandmark } = req.body
+    if (!shoppingID || !firstName || !lastName || !contactNumber || !city || !address || !nearLandmark) {
         return res.status(400).json({
             success: false,
             message: "All fields are required."
@@ -13,6 +13,7 @@ const createShippingInfo = async (req, res) => {
     }
     try {
         const shippingInfo = new ShippingInfo({
+            shoppingID: shoppingID,
             firstName: firstName,
             lastName: lastName,
             contactNumber: contactNumber,
@@ -60,6 +61,7 @@ const getSingleShippingInfo = async (req, res) => {
 const updateShippingInfo = async (req, res) => {
     console.log(req.body);
     const {
+        shoppingID,
         firstName,
         lastName,
         contactNumber,
@@ -68,7 +70,8 @@ const updateShippingInfo = async (req, res) => {
         nearLandmark
     } = req.body;
     const id = req.params.id;
-    if (!firstName
+    if (!shoppingID
+        || !firstName
         || !lastName
         || !contactNumber
         || !city
@@ -82,6 +85,7 @@ const updateShippingInfo = async (req, res) => {
     }
     try {
         const updateShippingInfo = {
+            shoppingID: shoppingID,
             firstName: firstName,
             lastName: lastName,
             contactNumber: contactNumber,
