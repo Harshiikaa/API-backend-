@@ -59,6 +59,7 @@ app.use('/api/rating', require('./routes/ratingRoutes'))
 
 
 
+
 //run the server
 app.listen(PORT, () => {
     console.log(`Server is running on ${PORT}`);

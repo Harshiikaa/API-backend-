@@ -1,50 +1,64 @@
 const Orders = require("../model/orderModel");
 
 
+
 const createOrder = async (req, res) => {
     console.log(req.body);
 
     // destructure data 
-    const { userID,
-        shoppingID,
-        shippingID,
-        totalPayment,
-        paymentMethod,
-        orderStatus,
-        createdAt
-    } = req.body;
+    const { userID, shoppingItemList, shippingID, totalPayment, paymentMethod, orderStatus, createdAt } = req.body;
 
     // validate the data 
-    if (!userID || !shoppingID || !shippingID || !totalPayment || !paymentMethod || !orderStatus || !createdAt)
+    if (!userID || !shoppingItemList || !shippingID || !totalPayment || !paymentMethod || !orderStatus || !createdAt)
         return res.json({
             success: false,
             message: "Please fill all the fields"
-        })
+        });
+
+    let parsedShoppingItemList;
+    try {
+        // Attempt to parse shoppingItemList from JSON string to array of objects
+        parsedShoppingItemList = JSON.parse(shoppingItemList);
+        if (!Array.isArray(parsedShoppingItemList)) {
+            throw new Error('Invalid shoppingItemList format');
+        }
+    } catch (error) {
+        console.error('Error parsing shoppingItemList:', error);
+        return res.status(400).json({
+            success: false,
+            message: 'Invalid shoppingItemList format'
+        });
+    }
 
     // try catch block 
     try {
         const newOrder = new Orders({
-            userID: userID,
-            shoppingID: shoppingID,
-            shippingID: shippingID,
-            totalPayment: totalPayment,
-            paymentMethod: paymentMethod,
-            orderStatus: orderStatus,
-            createdAt: createdAt,
-        })
+            userID,
+            shoppingItemList: parsedShoppingItemList,
+            shippingID,
+            totalPayment,
+            paymentMethod,
+            orderStatus: orderStatus || "pending",
+            createdAt: createdAt || Date.now(),
+        });
+
         await newOrder.save();
+
         res.status(200).json({
             success: true,
-            message: "Order created succesfully",
+            message: "Your order has been created. Check the status of your order in the order section",
             data: newOrder
-        })
+        });
 
     } catch (error) {
-        console.log(error);
-        res.status(500).json("Server Error")
-
+        console.error('Error creating order:', error);
+        res.status(500).json({
+            success: false,
+            message: "Server Error"
+        });
     }
-}
+};
+
 
 const getSingleOrder = async (req, res) => {
     const id = req.params.id;
@@ -73,7 +87,19 @@ const getSingleOrder = async (req, res) => {
 const getOrderByUserID = async (req, res) => {
     const id = req.params.id;
     try {
-        const order = await Orders.find({ userID: id });
+        const order = await Orders.find({ userID: id })
+            .populate({
+                path: 'shoppingItemList.shoppingBagID',
+                model: 'shoppingBag',
+                select: 'productID deliveryDate returnDate totalPrice quantity',
+                populate: {
+                    path: 'productID',
+                    model: 'products',
+                    select: 'productName productPrice productCategory productDescription productImageURL'
+                }
+            })
+            .exec();
+
         res.json({
             message: "retrieved",
             success: true,
@@ -89,22 +115,83 @@ const getOrderByUserID = async (req, res) => {
 
 const getAllOrders = async (req, res) => {
     try {
-        const listOfOrders = await Orders.find();
+        const listOfOrders = await Orders.find()
+            .populate({
+                path: 'shoppingItemList.shoppingBagID',
+                model: 'shoppingBag',
+                select: 'productID deliveryDate returnDate totalPrice quantity',
+                populate: {
+                    path: 'productID',
+                    model: 'products',
+                    select: 'productName productPrice productCategory productDescription productImageURL'
+                }
+            })
+            .populate({
+                path: 'shippingID',
+                model: 'shippingInfo',
+                select: 'firstName lastName contactNumber city address nearLandmark'
+            })
+            .exec();
+
         res.json({
             success: true,
-            message: "Products fetched successfully",
+            message: "Orders fetched successfully",
             orders: listOfOrders,
             count: listOfOrders.length,
-
-        })
-
+        });
     } catch (error) {
-        console.log(error)
-        res.status(500).json("Server Error")
-
+        console.log(error);
+        res.status(500).json("Server Error");
     }
+};
 
-}
+
+// const getAllOrders = async (req, res) => {
+//     try {
+//         const listOfOrders = await Orders.find();
+//         res.json({
+//             success: true,
+//             message: "Products fetched successfully",
+//             orders: listOfOrders,
+//             count: listOfOrders.length,
+
+//         })
+
+//     } catch (error) {
+//         console.log(error)
+//         res.status(500).json("Server Error")
+
+//     }
+
+// }
+
+// const getAllOrders = async (req, res) => {
+//     try {
+//         const listOfOrders = await Orders.find()
+//             .populate({
+//                 path: 'shoppingItemList.shoppingBagID',
+//                 model: 'shoppingBag',
+//                 select: 'productID deliveryDate returnDate totalPrice quantity',
+//                 populate: {
+//                     path: 'productID',
+//                     model: 'products',
+//                     select: 'productName productPrice productCategory productDescription productImageURL'
+//                 }
+//             })
+//             .exec();
+
+//         res.json({
+//             success: true,
+//             message: "Products fetched successfully",
+//             orders: listOfOrders,
+//             count: listOfOrders.length,
+//         });
+//     } catch (error) {
+//         console.log(error);
+//         res.status(500).json("Server Error");
+//     }
+// };
+
 
 
 const updateOrderStatus = async (req, res) => {

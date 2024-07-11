@@ -6,11 +6,13 @@ const orderSchema = mongoose.Schema({
         ref: 'users',
         required: true,
     },
-    shoppingID: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'shoppingBag',
-        required: true,
-    },
+    shoppingItemList: [{
+        shoppingBagID: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'shoppingBag', // Adjust the reference to your actual product collection name
+            required: true,
+        }
+    }],
     shippingID: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'shippingInfo',

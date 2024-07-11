@@ -42,6 +42,8 @@ const createProduct = async (req, res) => {
             productSize: productSize,
             productDescription: productDescription,
             productImageURL: uploadedImage.secure_url,
+            // averageRating: 0,  // Default average rating
+            // ratingCount: 0     // Default rating count
         })
         await newProduct.save();
         res.status(200).json({
@@ -76,27 +78,6 @@ const getAllProducts = async (req, res) => {
 
 }
 
-
-// const getProductsByCategory = async (req, res) => {
-//     const category = "Antique Jewelry";
-
-//     try {
-//         const categoryProducts = await Products.find({ productCategory: category });
-
-//         res.json({
-//             message: "Products fetched successfully by Antique Jewelry",
-//             success: true,
-//             products: categoryProducts,
-//         });
-//     } catch (error) {
-//         res.json({
-//             message: "Error fetching products by Antique Jewelry",
-//             success: false,
-//         });
-//     }
-// };
-
-
 // function to get single product
 const getSingleProduct = async (req, res) => {
     const id = req.params.id;
@@ -118,35 +99,6 @@ const getSingleProduct = async (req, res) => {
         console.log(error);
         res.status(500).json("Server Error")
 
-    }
-}
-
-const getUserProductPagination = async (req, res) => {
-    const requestPage = req.query.page;
-    const resultPerPage = 4;
-    try {
-        const products = await Products.find({})
-            .skip((requestPage - 1) * resultPerPage)
-            .limit(resultPerPage);
-
-        const totalProductsCount = await Products.countDocuments();
-        if (products.length === 0) {
-            return res.json({
-                success: false,
-                message: "No product found"
-            });
-        }
-        res.json({
-            success: true,
-            products: products,
-            totalPages: Math.ceil(totalProductsCount / resultPerPage),
-        });
-    } catch (error) {
-        console.log(error);
-        res.json(500).json({
-            success: false,
-            message: "Server Error",
-        });
     }
 }
 
@@ -260,7 +212,6 @@ const deleteProduct = async (req, res) => {
 module.exports = {
     createProduct,
     getAllProducts,
-    getUserProductPagination,
     getSingleProduct,
     updateProduct,
     deleteProduct

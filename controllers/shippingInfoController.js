@@ -2,34 +2,127 @@
 const ShippingInfo = require("../model/ShippingInfoModel")
 
 // CREATE SHIPPING INFO 
+// const createShippingInfo = async (req, res) => {
+//     const { userID, shoppingBag, firstName, lastName, contactNumber, city, address, nearLandmark } = req.body;
+
+//     // Check if all required fields are provided
+//     if (!userID || !shoppingBag || !firstName || !lastName || !contactNumber || !city || !address || !nearLandmark) {
+//         return res.status(400).json({
+//             success: false,
+//             message: "All fields are required."
+//         });
+//     }
+
+//     try {
+//         // Convert shoppingBag data into a format suitable for saving
+//         const items = shoppingBag.map(item => ({
+//             productID: item.productId, // Adjust based on your schema
+//             quantity: item.quantity,
+//             totalPrice: item.totalPrice,
+//             deliveryDate: item.deliveryDate,
+//             returnDate: item.returnDate,
+//             // Include other necessary fields from shoppingBag items
+//         }));
+
+//         // Create new ShippingInfo document
+//         const shippingInfo = new ShippingInfo({
+//             userID: userID,
+//             firstName: firstName,
+//             lastName: lastName,
+//             contactNumber: contactNumber,
+//             city: city,
+//             address: address,
+//             nearLandmark: nearLandmark,
+//             items: items // Assuming your schema has a field for items or shopping bag items
+//         });
+
+//         // Save shippingInfo to database
+//         await shippingInfo.save();
+
+//         // Respond with success message
+//         res.status(200).json({
+//             success: true,
+//             message: "Shipping Info created successfully."
+//         });
+//     } catch (error) {
+//         // Handle server error
+//         console.error(error);
+//         res.status(500).json({
+//             success: false,
+//             message: "Server error"
+//         });
+//     }
+// };
+
 const createShippingInfo = async (req, res) => {
-    console.log(req.body)
-    const { shoppingID, firstName, lastName, contactNumber, city, address, nearLandmark } = req.body
-    if (!shoppingID || !firstName || !lastName || !contactNumber || !city || !address || !nearLandmark) {
-        return res.status(400).json({
+    console.log(req.body);
+    const id = req.user.id;
+
+    // destructure data 
+    const {
+        userID,
+        firstName,
+        lastName,
+        contactNumber,
+        city,
+        address,
+        nearLandmark
+    } = req.body;
+
+
+    // validate the data 
+    if (!userID || !firstName || !lastName || !contactNumber || !city || !address || !nearLandmark) {
+        return res.json({
             success: false,
-            message: "All fields are required."
-        })
+            message: "Please provide all the details"
+        });
     }
+
+    // try-catch block 
     try {
-        const shippingInfo = new ShippingInfo({
-            shoppingID: shoppingID,
+        const existingInShippingInfo = await ShippingInfo.findOne({
+            userID: id,
             firstName: firstName,
             lastName: lastName,
             contactNumber: contactNumber,
             city: city,
             address: address,
             nearLandmark: nearLandmark
-        })
-        await shippingInfo.save()
+        });
+
+        if (existingInShippingInfo) {
+            return res.json({
+                success: false,
+                message: "This item is already in shipping info"
+            });
+        }
+
+        // Create a new cart entry
+        const newShippingInfo = new ShippingInfo({
+            userID: id,
+            firstName: firstName,
+            lastName: lastName,
+            contactNumber: contactNumber,
+            city: city,
+            address: address,
+            nearLandmark: nearLandmark
+
+        });
+
+        // Save the new cart
+        await newShippingInfo.save();
+
         res.status(200).json({
             success: true,
-            message: "Shipping Info created successfully."
-        })
+            message: "Item added to Shipping info",
+            data: newShippingInfo
+        });
+
     } catch (error) {
-        res.status(500).json("Server error")
+        console.log(error);
+        res.status(500).json("Server Error");
     }
-}
+};
 
 // GET SINGLE SHIPPING INFO
 const getSingleShippingInfo = async (req, res) => {
@@ -57,11 +150,30 @@ const getSingleShippingInfo = async (req, res) => {
 }
 
 
+//GET SHIPPING INFO BY USER
+const getShippingInfoByUserID = async (req, res) => {
+    const id = req.params.id;
+    try {
+        const shippingInfo = await ShippingInfo.find({ userID: id });
+        res.json({
+            message: "retrieved",
+            success: true,
+            shippingInfo: shippingInfo,
+        });
+    } catch (e) {
+        res.json({
+            message: "error",
+            success: false,
+        });
+    }
+};
+
+
 // UPDATE SHIPPING INFO
 const updateShippingInfo = async (req, res) => {
     console.log(req.body);
     const {
-        shoppingID,
+        userID,
         firstName,
         lastName,
         contactNumber,
@@ -70,7 +182,7 @@ const updateShippingInfo = async (req, res) => {
         nearLandmark
     } = req.body;
     const id = req.params.id;
-    if (!shoppingID
+    if (!userID
         || !firstName
         || !lastName
         || !contactNumber
@@ -85,7 +197,7 @@ const updateShippingInfo = async (req, res) => {
     }
     try {
         const updateShippingInfo = {
-            shoppingID: shoppingID,
+            userID: userID,
             firstName: firstName,
             lastName: lastName,
             contactNumber: contactNumber,
@@ -110,7 +222,76 @@ const updateShippingInfo = async (req, res) => {
 
 }
 
+// const updateShippingInfo = async (req, res) => {
+//     const {
+//         userID,
+//         shoppingBag,
+//         firstName,
+//         lastName,
+//         contactNumber,
+//         city,
+//         address,
+//         nearLandmark
+//     } = req.body;
+//     const id = req.params.id;
 
-module.exports = { createShippingInfo, getSingleShippingInfo, updateShippingInfo };
+//     // Check if all required fields are provided
+//     if (!userID
+//         || !shoppingBag
+//         || !firstName
+//         || !lastName
+//         || !contactNumber
+//         || !city
+//         || !address
+//         || !nearLandmark
+//     ) {
+//         return res.json({
+//             success: false,
+//             message: "All fields are required!"
+//         });
+//     }
+
+//     try {
+//         // Convert shoppingBag data into a format suitable for updating
+//         const items = shoppingBag.map(item => ({
+//             productID: item.productId, // Adjust based on your schema
+//             quantity: item.quantity,
+//             totalPrice: item.totalPrice,
+//             deliveryDate: item.deliveryDate,
+//             returnDate: item.returnDate,
+//             // Include other necessary fields from shoppingBag items
+//         }));
+
+//         const updateShippingInfo = {
+//             userID: userID,
+//             items: items,
+//             firstName: firstName,
+//             lastName: lastName,
+//             contactNumber: contactNumber,
+//             city: city,
+//             address: address,
+//             nearLandmark: nearLandmark
+//         };
+
+//         // Find and update ShippingInfo by ID
+//         await ShippingInfo.findByIdAndUpdate(id, updateShippingInfo);
+
+//         res.json({
+//             success: true,
+//             message: "ShippingInfo updated successfully",
+//             shippingInfo: updateShippingInfo
+//         });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({
+//             success: false,
+//             message: "Server Error"
+//         });
+//     }
+// };
+
+
+
+module.exports = { createShippingInfo, getShippingInfoByUserID, getSingleShippingInfo, updateShippingInfo };
 
 
