@@ -146,65 +146,73 @@ const getAllOrders = async (req, res) => {
 };
 
 
-// const getAllOrders = async (req, res) => {
-//     try {
-//         const listOfOrders = await Orders.find();
-//         res.json({
-//             success: true,
-//             message: "Products fetched successfully",
-//             orders: listOfOrders,
-//             count: listOfOrders.length,
+// const updateOrderStatus = async (req, res) => {
+//     console.log(req.body);
 
-//         })
+//     const { orderStatus } = req.body;
+//     const id = req.params.id;
 
-//     } catch (error) {
-//         console.log(error)
-//         res.status(500).json("Server Error")
-
+//     // Check if orderStatus is provided
+//     if (!orderStatus) {
+//         return res.json({
+//             success: false,
+//             message: "orderStatus is required!"
+//         });
 //     }
 
-// }
-
-// const getAllOrders = async (req, res) => {
 //     try {
-//         const listOfOrders = await Orders.find()
-//             .populate({
-//                 path: 'shoppingItemList.shoppingBagID',
-//                 model: 'shoppingBag',
-//                 select: 'productID deliveryDate returnDate totalPrice quantity',
-//                 populate: {
-//                     path: 'productID',
-//                     model: 'products',
-//                     select: 'productName productPrice productCategory productDescription productImageURL'
-//                 }
-//             })
-//             .exec();
+//         // Find the order by ID and update the orderStatus field
+//         const updatedOrder = await Orders.findByIdAndUpdate(
+//             id,
+//             { orderStatus: orderStatus },
+//             { new: true }
+//         );
+
+//         if (!updatedOrder) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: "Order not found!"
+//             });
+//         }
 
 //         res.json({
 //             success: true,
-//             message: "Products fetched successfully",
-//             orders: listOfOrders,
-//             count: listOfOrders.length,
+//             message: "Order status updated successfully",
+//             order: updatedOrder
 //         });
 //     } catch (error) {
 //         console.log(error);
-//         res.status(500).json("Server Error");
+//         res.status(500).json({
+//             success: false,
+//             message: "Server Error"
+//         });
 //     }
 // };
 
 
 
+
+
 const updateOrderStatus = async (req, res) => {
-    console.log(req.body);
+    console.log(req.body); // Debugging: Log the request body
 
     const { orderStatus } = req.body;
     const id = req.params.id;
 
-    // Check if orderStatus is provided
+    const validStatuses = ["Pending", "In Process", "Delivered", "Canceled"];
+
+    // Check if orderStatus is provided and valid
     if (!orderStatus) {
         return res.json({
             success: false,
             message: "orderStatus is required!"
+        });
+    }
+
+    if (!validStatuses.includes(orderStatus)) {
+        return res.json({
+            success: false,
+            message: `Invalid orderStatus. Valid statuses are: ${validStatuses.join(", ")}.`
         });
     }
 
@@ -229,13 +237,14 @@ const updateOrderStatus = async (req, res) => {
             order: updatedOrder
         });
     } catch (error) {
-        console.log(error);
+        console.error('Error updating order status:', error);
         res.status(500).json({
             success: false,
             message: "Server Error"
         });
     }
 };
+
 
 const cancelOrder = async (req, res) => {
     const id = req.params.id;
