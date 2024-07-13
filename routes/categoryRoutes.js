@@ -13,6 +13,8 @@ router.get("/getCategories", categoryController.getAllCategories)
 // router.get("/getCategory/:id", categoryController.getSingleCategory)
 
 // delete Category API
-router.delete("/deleteCategory/:id", authGuardAdmin, categoryController.deleteCategory)
+// router.delete("/deleteCategory/:id", authGuardAdmin, categoryController.deleteCategory)
+router.delete("/deleteCategory/:id", categoryController.deleteCategory)
+
 
 module.exports = router;

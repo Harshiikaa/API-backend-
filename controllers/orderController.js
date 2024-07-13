@@ -123,7 +123,7 @@ const getAllOrders = async (req, res) => {
                 populate: {
                     path: 'productID',
                     model: 'products',
-                    select: 'productName productPrice productCategory productDescription productImageURL'
+                    select: 'productName productRentalPrice productSecurityDeposit productCategory productQuantity productSize productDescription  productImageURL averageRating ratingCount'
                 }
             })
             .populate({
@@ -199,7 +199,7 @@ const updateOrderStatus = async (req, res) => {
     const { orderStatus } = req.body;
     const id = req.params.id;
 
-    const validStatuses = ["Pending", "In Process", "Delivered", "Canceled"];
+    const validStatuses = ["PENDING", "IN PROCESS", "DELIVERED", "CANCELED"];
 
     // Check if orderStatus is provided and valid
     if (!orderStatus) {

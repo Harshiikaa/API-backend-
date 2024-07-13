@@ -5,6 +5,7 @@ const { authGuard } = require('../middleware/authGuard')
 
 router.post('/createShippingInfo', authGuard, shippingInfoController.createShippingInfo)
 router.get('/getShippingInfoByUserID/:id', authGuard, shippingInfoController.getShippingInfoByUserID)
+// router.get('/getShippingInfoByShoppingID/:id', authGuard, shippingInfoController.getShippingInfoByShoppingID)
 router.get('/getSingleShippingInfo/:id', shippingInfoController.getSingleShippingInfo)
 router.put('/updateShippingInfo/:id', authGuard, shippingInfoController.updateShippingInfo)
 module.exports = router;

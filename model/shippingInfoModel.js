@@ -5,6 +5,11 @@ const shippingInfoSchema = mongoose.Schema({
         ref: 'users',
         required: true,
     },
+    // shoppingBagID: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: 'shoppingBag',
+    //     required: true,
+    // },
     firstName: {
         type: String,
         required: true,

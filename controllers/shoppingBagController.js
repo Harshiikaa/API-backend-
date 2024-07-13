@@ -85,83 +85,153 @@ const getShoppingBagByUserID = async (req, res) => {
     }
 };
 
+// const getSingleShoppingBag = async (req, res) => {
+//     const id = req.params.id;
+//     if (!id) {
+//         return res.json({
+//             success: false,
+//             message: "Shopping bag id is required!"
+//         })
+//     }
+//     try {
+//         const singleShoppingBag = await ShoppingBag.findById(id);
+//         res.json({
+//             success: true,
+//             message: "Shopping bag fetched successfully",
+//             shoppingBag: singleShoppingBag
+//         })
+
+//     } catch (error) {
+//         console.log(error);
+//         res.status(500).json("Server Error")
+
+//     }
+// }
+
 const getSingleShoppingBag = async (req, res) => {
     const id = req.params.id;
     if (!id) {
         return res.json({
             success: false,
             message: "Shopping bag id is required!"
-        })
+        });
     }
     try {
-        const singleShoppingBag = await ShoppingBag.findById(id);
+        const singleShoppingBag = await ShoppingBag.findById(id).populate('productID', 'productName productRentalPrice productSecurityDeposit productCategory productQuantity productSize productDescription productImageURL');
         res.json({
             success: true,
             message: "Shopping bag fetched successfully",
             shoppingBag: singleShoppingBag
-        })
-
+        });
     } catch (error) {
         console.log(error);
-        res.status(500).json("Server Error")
-
+        res.status(500).json({
+            success: false,
+            message: "Server Error"
+        });
     }
-}
+};
 
 // function to update the ShoppingBag
+// const updateShoppingBag = async (req, res) => {
+//     console.log(req.body);
+//     console.log(req.files);
+
+//     const {
+//         userID,
+//         productID,
+//         deliveryDate,
+//         returnDate,
+//         totalPrice,
+//         quantity,
+
+//     } = req.body;
+
+
+//     const id = req.params.id;
+//     if (!userID
+//         || !productID
+//         || !deliveryDate
+//         || !returnDate
+//         || !totalPrice
+//         || !quantity
+//     ) {
+//         res.json({
+//             success: true,
+//             message: "All fields are required!"
+//         })
+//     }
+//     try {
+//         const updatedShoppingBag = {
+//             userID: userID,
+//             productID: productID,
+//             deliveryDate: deliveryDate,
+//             returnDate: returnDate,
+//             totalPrice: totalPrice,
+//             quantity: quantity,
+
+//         }
+//         await ShoppingBag.findByIdAndUpdate(id, updatedShoppingBag);
+//         res.json({
+//             success: true,
+//             message: "Shopping bag updated successfully",
+//             shoppingBag: updatedShoppingBag
+//         })
+
+//     } catch (error) {
+//         console.log(error)
+//         res.status(500).json({
+//             success: false,
+//             message: "Server Error"
+//         })
+//     }
+// }
+
 const updateShoppingBag = async (req, res) => {
     console.log(req.body);
     console.log(req.files);
 
     const {
-        userID,
-        productID,
         deliveryDate,
         returnDate,
-        totalPrice,
         quantity,
+        totalPrice,
 
     } = req.body;
 
-
     const id = req.params.id;
-    if (!userID
-        || !productID
-        || !deliveryDate
-        || !returnDate
-        || !totalPrice
-        || !quantity
-    ) {
-        res.json({
-            success: true,
-            message: "All fields are required!"
-        })
+    if (!deliveryDate || !quantity || !returnDate || !totalPrice) {
+        return res.json({
+            success: false,
+            message: "Delivery date and quantity are required!"
+        });
     }
+
     try {
-        const updatedShoppingBag = {
-            userID: userID,
-            productID: productID,
+        // Update only the specified fields
+        const updatedFields = {
             deliveryDate: deliveryDate,
+            quantity: quantity,
             returnDate: returnDate,
             totalPrice: totalPrice,
-            quantity: quantity,
+        };
 
-        }
-        await ShoppingBag.findByIdAndUpdate(id, updatedShoppingBag);
+        const updatedShoppingBag = await ShoppingBag.findByIdAndUpdate(id, updatedFields, { new: true }).populate('productID', 'productName productRentalPrice productSecurityDeposit productCategory productQuantity productSize productDescription productImageURL');
+
         res.json({
             success: true,
             message: "Shopping bag updated successfully",
             shoppingBag: updatedShoppingBag
-        })
-
+        });
     } catch (error) {
-        console.log(error)
+        console.log(error);
         res.status(500).json({
             success: false,
             message: "Server Error"
-        })
+        });
     }
-}
+};
+
 
 const removeFromShoppingBag = async (req, res) => {
     const id = req.params.id;

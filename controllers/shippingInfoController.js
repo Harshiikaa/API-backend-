@@ -1,59 +1,6 @@
 
 const ShippingInfo = require("../model/ShippingInfoModel")
 
-// CREATE SHIPPING INFO 
-// const createShippingInfo = async (req, res) => {
-//     const { userID, shoppingBag, firstName, lastName, contactNumber, city, address, nearLandmark } = req.body;
-
-//     // Check if all required fields are provided
-//     if (!userID || !shoppingBag || !firstName || !lastName || !contactNumber || !city || !address || !nearLandmark) {
-//         return res.status(400).json({
-//             success: false,
-//             message: "All fields are required."
-//         });
-//     }
-
-//     try {
-//         // Convert shoppingBag data into a format suitable for saving
-//         const items = shoppingBag.map(item => ({
-//             productID: item.productId, // Adjust based on your schema
-//             quantity: item.quantity,
-//             totalPrice: item.totalPrice,
-//             deliveryDate: item.deliveryDate,
-//             returnDate: item.returnDate,
-//             // Include other necessary fields from shoppingBag items
-//         }));
-
-//         // Create new ShippingInfo document
-//         const shippingInfo = new ShippingInfo({
-//             userID: userID,
-//             firstName: firstName,
-//             lastName: lastName,
-//             contactNumber: contactNumber,
-//             city: city,
-//             address: address,
-//             nearLandmark: nearLandmark,
-//             items: items // Assuming your schema has a field for items or shopping bag items
-//         });
-
-//         // Save shippingInfo to database
-//         await shippingInfo.save();
-
-//         // Respond with success message
-//         res.status(200).json({
-//             success: true,
-//             message: "Shipping Info created successfully."
-//         });
-//     } catch (error) {
-//         // Handle server error
-//         console.error(error);
-//         res.status(500).json({
-//             success: false,
-//             message: "Server error"
-//         });
-//     }
-// };
-
 const createShippingInfo = async (req, res) => {
     console.log(req.body);
     const id = req.user.id;
@@ -61,6 +8,7 @@ const createShippingInfo = async (req, res) => {
     // destructure data 
     const {
         userID,
+        // shoppingBagID,
         firstName,
         lastName,
         contactNumber,
@@ -71,7 +19,7 @@ const createShippingInfo = async (req, res) => {
 
 
     // validate the data 
-    if (!userID || !firstName || !lastName || !contactNumber || !city || !address || !nearLandmark) {
+    if (!userID  || !firstName || !lastName || !contactNumber || !city || !address || !nearLandmark) {
         return res.json({
             success: false,
             message: "Please provide all the details"
@@ -82,6 +30,7 @@ const createShippingInfo = async (req, res) => {
     try {
         const existingInShippingInfo = await ShippingInfo.findOne({
             userID: id,
+            // shoppingBagID: shoppingBagID,
             firstName: firstName,
             lastName: lastName,
             contactNumber: contactNumber,
@@ -100,6 +49,7 @@ const createShippingInfo = async (req, res) => {
         // Create a new cart entry
         const newShippingInfo = new ShippingInfo({
             userID: id,
+            // shoppingBagID: shoppingBagID,
             firstName: firstName,
             lastName: lastName,
             contactNumber: contactNumber,
@@ -159,6 +109,53 @@ const getShippingInfoByUserID = async (req, res) => {
             message: "retrieved",
             success: true,
             shippingInfo: shippingInfo,
+        });
+    } catch (e) {
+        res.json({
+            message: "error",
+            success: false,
+        });
+    }
+};
+
+
+// const getShippingInfoByShoppingID = async (req, res) => {
+//     const id = req.params.id;
+//     try {
+//         const shippingInfo = await ShippingInfo.find({ shoppingID: id });
+//         res.json({
+//             message: "retrieved",
+//             success: true,
+//             shippingInfo: shippingInfo,
+//         });
+//     } catch (e) {
+//         res.json({
+//             message: "error",
+//             success: false,
+//         });
+//     }
+// };
+
+const getShippingInfoByShoppingID = async (req, res) => {
+    const id = req.params.id;
+    try {
+        const shippingInfo = await ShippingInfo.find({ shoppingBagID: id });
+
+        // Extracting required fields from shippingInfo array
+        const mappedShippingInfo = shippingInfo.map(info => ({
+            // shoppingBagID: info.shoppingBagID,
+            firstName: info.firstName,
+            lastName: info.lastName,
+            contactNumber: info.contactNumber,
+            city: info.city,
+            address: info.address,
+            nearLandmark: info.nearLandmark
+        }));
+
+        res.json({
+            message: "retrieved",
+            success: true,
+            shippingInfo: mappedShippingInfo,
         });
     } catch (e) {
         res.json({
@@ -292,6 +289,6 @@ const updateShippingInfo = async (req, res) => {
 
 
 
-module.exports = { createShippingInfo, getShippingInfoByUserID, getSingleShippingInfo, updateShippingInfo };
+module.exports = { createShippingInfo, getShippingInfoByUserID, getShippingInfoByShoppingID, getSingleShippingInfo, updateShippingInfo };
 
 

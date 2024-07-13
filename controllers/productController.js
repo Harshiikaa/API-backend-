@@ -42,8 +42,8 @@ const createProduct = async (req, res) => {
             productSize: productSize,
             productDescription: productDescription,
             productImageURL: uploadedImage.secure_url,
-            // averageRating: 0,  // Default average rating
-            // ratingCount: 0     // Default rating count
+            averageRating: 0,  // Default average rating
+            ratingCount: 0     // Default rating count
         })
         await newProduct.save();
         res.status(200).json({
