@@ -9,4 +9,9 @@ router.get('/getSingleUser/:id', userController.getSingleUser)
 router.get('/getUsers', userController.getAllUsers)
 router.put('/updateUser/:id', authGuard, userController.updateUser)
 router.delete('/deleteUser/:id', authGuard, userController.deleteUser)
+router.post("/resetPassword/:token", userController.resetPassword)
+// send email Link For reset Password
+router.post("/forgetPassword", userController.forgetPassword);
+
+
 module.exports = router;

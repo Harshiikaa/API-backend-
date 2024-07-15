@@ -2,6 +2,9 @@ const Users = require("../model/userModel")
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 const cloudinary = require('cloudinary')
+const nodemailer = require("nodemailer")
+const randomstring = require("randomstring")
+const keysecret = process.env.JWT_TOKEN_SECRET
 
 
 
@@ -238,6 +241,101 @@ const deleteUser = async (req, res) => {
 
 }
 
-module.exports = { registerUser, loginUser, getAllUsers, getSingleUser, updateUser, deleteUser };
+const forgetPassword = async (req, res) => {
+    try {
+        const userData = await Users.findOne({ email: req.body.email });
+        if (userData) {
+            const randomString = randomstring.generate();
+            const data = await Users.updateOne(
+                { email: req.body.email },
+                { $set: { token: randomString } }
+            );
+            sendResetPasswordMail(userData.firstName, userData.email, randomString);
+            res
+                .status(200)
+                .send({ success: true, message: "Please check your inbox of mail" });
+        } else {
+            res
+                .status(200)
+                .send({ success: true, message: "This email does not exits" });
+        }
+    } catch (error) {
+        res.status(400).send({ success: false, message: error.message });
+    }
+};
+
+const sendResetPasswordMail = async (firstName, email, token) => {
+    try {
+        const transporter = nodemailer.createTransport({
+            // Configure SMTP settings
+            service: "gmail",
+            host: "smtp.gmail.com",
+
+            auth: {
+                user: process.env.SMTP_MAIL,
+                pass: process.env.SMTP_PASSWORD,
+            },
+
+        });
+
+        const mailOptions = {
+            from: process.env.SMTP_MAIL,
+            to: email, // User's email
+            subject: "Reset the Password",
+            html:
+                "Hi " +
+                firstName +
+                ', Please copy the link and <a href="http://localhost:3000/resetPassword/' +
+                token +
+                '">click here</a> to reset your password',
+        };
+
+        transporter.sendMail(mailOptions, async (error, info) => {
+            if (error) {
+                console.log(error); // Log the specific error
+            } else {
+                console.log("Mail has been sent :- ", info.response);
+            }
+        });
+    } catch (error) {
+        res.status(400).send({ success: false, msg: error.message });
+    }
+};
+
+const resetPassword = async (req, res) => {
+    try {
+        const token = req.params.token;
+        const tokenData = await Users.findOne({ token: token });
+
+        if (!tokenData) {
+            res.status(200).send({ success: false, message: "The token is expired" });
+        } else {
+            // Ensure that the password is defined and not an empty string
+            const { password } = req.body;
+            if (!password || password.trim() === "") {
+                return res
+                    .status(400)
+                    .send({ success: false, message: "Invalid password" });
+            }
+
+            // Hash the new password before updating
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            // Update the user's password and clear the token
+            const data = await Users.updateOne(
+                { token: token },
+                { $set: { password: hashedPassword, token: "" } }
+            );
+
+            res
+                .status(200)
+                .send({ success: true, message: "Password reset successfully" });
+        }
+    } catch (error) {
+        res.status(400).send({ success: false, message: error.message });
+    }
+};
+
+module.exports = { registerUser, loginUser, getAllUsers, getSingleUser, updateUser, deleteUser, forgetPassword, sendResetPasswordMail, resetPassword };
 
 

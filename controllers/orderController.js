@@ -38,7 +38,7 @@ const createOrder = async (req, res) => {
             shippingID,
             totalPayment,
             paymentMethod,
-            orderStatus: orderStatus || "pending",
+            orderStatus: orderStatus || "PENDING",
             createdAt: createdAt || Date.now(),
         });
 

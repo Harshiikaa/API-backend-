@@ -30,7 +30,7 @@ const orderSchema = mongoose.Schema({
     orderStatus: {
         type: String,
         required: true,
-        default: "pending",
+        default: "PENDING",
     },
     createdAt: {
         type: Date,
