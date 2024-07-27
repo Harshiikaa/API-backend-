@@ -12,6 +12,7 @@ router.delete('/deleteUser/:id', authGuard, userController.deleteUser)
 router.post("/resetPassword/:token", userController.resetPassword)
 // send email Link For reset Password
 router.post("/forgetPassword", userController.forgetPassword);
+router.post('/changePassword', userController.changePassword);
 
 
 module.exports = router;

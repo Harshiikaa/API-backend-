@@ -27,6 +27,23 @@ const userSchema = mongoose.Schema({
     userImage: {
         type: String,
         default: null,
+    },
+    passwordHistory: [
+        {
+            password: { type: String, required: true },
+            changedAt: { type: Date, required: true }
+        }
+    ],
+    passwordChangedAt: {
+        type: Date,
+        default: Date.now,
+    },
+    loginAttempts: {
+        type: Number,
+        default: 0,
+    },
+    lockUntil: {
+        type: Date,
     }
 });
 
